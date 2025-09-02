@@ -8,6 +8,7 @@ import urllib.parse
 import requests
 from dotenv import load_dotenv
 from database import load_settings, save_settings, migrate_from_json
+from converter import google_to_discord, discord_to_google
 
 import discord
 from discord import TextChannel, SyncWebhook, app_commands
@@ -211,12 +212,6 @@ async def disc_send_message(
 				f.close()
 			except Exception:
 				pass
-
-def discord_to_google(text):
-	return text
-
-def google_to_discord(text):
-	return text
 
 async def process_commands(text, user):
 	global settings
@@ -458,10 +453,9 @@ async def on_message(message):
 		attempts = 0
 		while not sent_successfully and attempts < 5:
 			try:
-				resp = await chat_send_message(client, mgg, f"{message.author.display_name}: {text}", media)
-				if not isinstance(resp, Exception):
-					sent_successfully = True
-					break
+				resp = await chat_send_message(client=client, space_id=mgg, text=f"{message.author.display_name}: {text}", attachments=media)				if not isinstance(resp, Exception):
+				sent_successfully = True
+				break
 			except Exception as e:
 				logger.error(f"Send attempt {attempts + 1} failed: {e}")
 			
@@ -472,22 +466,22 @@ async def on_message(message):
 		if not sent_successfully:
 			logger.error("Failed to send to Google Chat after 5 attempts")
 
+logging.getLogger().handlers.clear()
+discord.utils.setup_logging(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+load_dotenv()
+bot_token = os.environ.get("BOT_TOKEN")
+settings = load_settings()
+
+client = get_chat_client(["https://www.googleapis.com/auth/chat.messages"])
+
+last_timestamp = settings["poll_timestamp"]
+mgg = settings["gchat_space"]
+discord_channel = settings["disc_channel"]
+webhook = SyncWebhook.partial(id=settings["webhook"]["id"], token=settings["webhook"]["token"], bot_token=bot_token)
+
 if __name__ == "__main__":
-	logging.getLogger().handlers.clear()
-	discord.utils.setup_logging(level=logging.DEBUG)
-	logger = logging.getLogger(__name__)
-
-	load_dotenv()
-	bot_token = os.environ.get("BOT_TOKEN")
-	settings = load_settings()
-
-	client = get_chat_client(["https://www.googleapis.com/auth/chat.messages"])
-
-	last_timestamp = settings["poll_timestamp"]
-	mgg = settings["gchat_space"]
-	discord_channel = settings["disc_channel"]
-	webhook = SyncWebhook.partial(id=settings["webhook"]["id"], token=settings["webhook"]["token"], bot_token=bot_token)
-
 	try:
 		bot.run(bot_token)
 	except KeyboardInterrupt:

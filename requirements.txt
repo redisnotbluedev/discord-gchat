@@ -5,3 +5,5 @@ google-auth-oauthlib
 supabase
 python-dotenv
 requests
+gunicorn
+flask
