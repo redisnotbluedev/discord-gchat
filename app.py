@@ -8,15 +8,15 @@ app = Flask(__name__)
 
 @app.route("/")
 def health_check():
-	return {"status": "alive", "bot_ready": bot_module.bot.is_ready()}, 200
+	return {"status": "alive", "bot_ready": bot_module.is_ready}, 200
 
 @app.route("/health")
 def detailed_health():
 	return {
 		"status": "healthy",
-		"bot_connected": bot_module.bot.is_ready(),
-		"guild_count": len(bot_module.bot.guilds) if bot_module.bot.is_ready() else 0,
-		"latency": round(bot_module.bot.latency * 1000, 2) if bot_module.bot.is_ready() else None
+		"bot_connected": bot_module.is_ready,
+		"guild_count": len(bot_module.bot.guilds) if bot_module.is_ready else 0,
+		"latency": round(bot_module.bot.latency * 1000, 2) if bot_module.is_ready else None
 	}, 200
 
 def run_bot():

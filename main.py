@@ -248,12 +248,14 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 @bot.event
 async def on_ready():
+	global is_ready
 	bot.tree.add_command(users_group)
 	bot.tree.add_command(settings_group)
 	await bot.tree.sync()
 	
 	logger.info(f"Logged in as {bot.user} (ID: {bot.user.id})")
 	bot.loop.create_task(chat_poll_messages())
+	is_ready = True
 
 @bot.tree.command(name="hello", description="Debug command.")
 async def hello(interaction: discord.Interaction):
@@ -466,6 +468,8 @@ async def on_message(message):
 
 		if not sent_successfully:
 			logger.error("Failed to send to Google Chat after 5 attempts")
+
+is_ready = False
 
 logging.getLogger().handlers.clear()
 discord.utils.setup_logging(level=logging.DEBUG)
