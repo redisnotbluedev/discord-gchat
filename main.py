@@ -453,9 +453,10 @@ async def on_message(message):
 		attempts = 0
 		while not sent_successfully and attempts < 5:
 			try:
-				resp = await chat_send_message(client=client, space_id=mgg, text=f"{message.author.display_name}: {text}", attachments=media)				if not isinstance(resp, Exception):
-				sent_successfully = True
-				break
+				resp = await chat_send_message(client=client, space_id=mgg, text=f"{message.author.display_name}: {text}", attachments=media)
+				if not isinstance(resp, Exception):
+					sent_successfully = True
+					break
 			except Exception as e:
 				logger.error(f"Send attempt {attempts + 1} failed: {e}")
 			
